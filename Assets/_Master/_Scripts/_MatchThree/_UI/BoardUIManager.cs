@@ -13,6 +13,7 @@ public class ColorByType
 }
 public class BoardUIManager : Singleton<BoardUIManager>
 {
+    [SerializeField] private DrawBoardControl drawBoardControl;
     [SerializeField] private Vector2 blockSize;
     [SerializeField] private Transform boardPivot;
     [SerializeField] private BlockUIControl blockPrefab;
@@ -23,11 +24,19 @@ public class BoardUIManager : Singleton<BoardUIManager>
     private bool isSwapping = false;
     public List<BlockUIControl> AllBlocks => allBlocks;
 
-    private void Start()
+    private BlockUIControl AddNewBlock(int x, int y)
     {
-        
-    }
+        BlockUIControl result = null;
+        if (drawBoardControl.CanAddBlock(x + 5, y + 5))
+        {
+            result = Instantiate(blockPrefab, boardPivot);
+            allBlocks.Add(result);
+            // go.rect.sizeDelta = blockSize;  
+            result.transform.position = new Vector2(x +0.5f , y + 0.5f );
+        }
 
+        return result;
+    }
     public void OnSetup()
     {
         foreach (var VARIABLE in _typesColor)
@@ -43,10 +52,12 @@ public class BoardUIManager : Singleton<BoardUIManager>
         {
             for (int j = -haftN; j < haftN; j++)
             {
-                var go = Instantiate(blockPrefab, boardPivot);
-                allBlocks.Add(go);
-                // go.rect.sizeDelta = blockSize;  
-                go.transform.position = new Vector2(i +0.5f , j + 0.5f );
+                var go = AddNewBlock(i, j);
+                if(go == null) continue;
+                // var go = Instantiate(blockPrefab, boardPivot);
+                // allBlocks.Add(go);
+                // // go.rect.sizeDelta = blockSize;  
+                // go.transform.position = new Vector2(i +0.5f , j + 0.5f );
                 BlockType type = (BlockType)Random.Range(0, (int)BlockType.COUNT);
                 go.OnSetup(i, j, type, _typesColorDic[type]);
             }
@@ -79,7 +90,7 @@ public class BoardUIManager : Singleton<BoardUIManager>
                 var go = Instantiate(blockPrefab, boardPivot);
                 allBlocks.Add(go);
                 // go.rect.sizeDelta = blockSize;  
-                go.transform.position = new Vector2(blockDestroy[0].x+0.5f , 5 + i + 0.5f );
+                go.transform.position = new Vector2(blockDestroy[0].x + 0.5f , 5 + i + 0.5f );
                 BlockType type = (BlockType)Random.Range(0, (int)BlockType.COUNT);
                 go.OnSetup(blockDestroy[0].x,5 + i,  type, _typesColorDic[type]);
                 if (blockDestroy[i].y > highestBlock) highestBlock = blockDestroy[i].y;
